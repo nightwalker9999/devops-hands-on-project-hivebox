@@ -24,35 +24,51 @@ def get_temperature():
     cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
 
     for box_id in SENSEBOX_IDS:
-        try:
-            response = requests.get(
-                OPENSENSEMAP_URL.format(box_id=box_id), timeout=5
-            )
-            response.raise_for_status()
-            sensors = response.json().get("sensors", [])
+        sensors = get_sensors(box_id=box_id)
+        temperature = extract_recent_temperature(sensors, cutoff)
 
-            for sensor in sensors:
-                if "temperatur" in sensor.get("title", "").lower():
-                    last = sensor.get("lastMeasurement")
-                    if not last:
-                        continue
-                    measured_at = datetime.fromisoformat(
-                        last["createdAt"].replace("Z", "+00:00")
-                    )
-                    if measured_at < cutoff:
-                        continue
-                    temps.append(float(last["value"]))
-                    break
-
-        except Exception as e:
-            print(f"Error fetching box {box_id}: {e}")
-            continue
-
+        if temperature is not None:
+            temps.append(temperature)
+            
     if not temps:
-        return jsonify({"error": "No valid temperature data available"}), 503
-
+        return jsonify({"error": "No temperature found"}), 503
+            
     avg = round(sum(temps) / len(temps), 2)
     return jsonify({"temperature": avg, "unit": "celsius", "count": len(temps)})
+
+
+
+def fetch_box_data(box_id):
+    response = requests.get(OPENSENSEMAP_URL.format(box_id=box_id), timeout=5)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_sensors(box_id):
+        box_data = fetch_box_data(box_id)
+        return box_data.get("sensors", [])
+
+def extract_recent_temperature(sensors, cutoff):
+    for sensor in sensors:
+
+        title = sensor.get("title")
+
+        if "Temperatur" not in title:
+            continue
+
+        last_measurement = sensor.get("lastMeasurement")
+        if not last_measurement:
+            continue
+
+        measured_at = datetime.fromisoformat(
+            last_measurement.get("createdAt").replace("Z", "+00:00")
+            )
+        if measured_at < cutoff:
+            continue
+
+        return float(last_measurement.get("value"))
+    
+    return None
 
 
 if __name__ == "__main__":
