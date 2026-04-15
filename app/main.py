@@ -1,18 +1,28 @@
-from flask import Flask, jsonify
 import requests
 from datetime import datetime, timezone, timedelta
+from prometheus_flask_exporter import PrometheusMetrics
+from flask import Flask, jsonify
+import os
 
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 
 APP_VERSION = "0.0.1"
 
-SENSEBOX_IDS = [
-    "5eba5fbad46fb8001b799786",
-    "5c21ff8f919bf8001adf2488",
-    "5ade1acf223bd80019a1011c",
-]
+SENSEBOX_IDS = os.getenv(
+    "SENSEBOX_IDS",
+    "5eba5fbad46fb8001b799786,5c21ff8f919bf8001adf2488,5ade1acf223bd80019a1011c"
+).split(",")
 
 OPENSENSEMAP_URL = "https://api.opensensemap.org/boxes/{box_id}?format=json"
+
+def get_temperature_avg(avg):
+    if avg < 10:
+        return "Too Cold"
+    elif avg <=36:
+        return "Good"
+    else:
+        print("Too Hot")
 
 @app.route("/version")
 def print_version():
@@ -34,7 +44,12 @@ def get_temperature():
         return jsonify({"error": "No temperature found"}), 503
             
     avg = round(sum(temps) / len(temps), 2)
-    return jsonify({"temperature": avg, "unit": "celsius", "count": len(temps)})
+    return jsonify({
+        "temperature": avg,
+        "unit": "celsius",
+        "count": len(temps),
+        "status": get_temperature_avg(avg)
+        })
 
 
 
