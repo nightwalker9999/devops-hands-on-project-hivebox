@@ -33,13 +33,17 @@ def get_temperature():
     temps = []
     cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
 
-    for box_id in SENSEBOX_IDS:
-        sensors = get_sensors(box_id=box_id)
-        temperature = extract_recent_temperature(sensors, cutoff)
+    try:
+        for box_id in SENSEBOX_IDS:
+            sensors = get_sensors(box_id=box_id)
+            temperature = extract_recent_temperature(sensors, cutoff)
 
-        if temperature is not None:
-            temps.append(temperature)
-            
+            if temperature is not None:
+                temps.append(temperature)
+                
+    except Exception as e:
+        return jsonify({"error": f"External API error: {e}"}), 503  
+          
     if not temps:
         return jsonify({"error": "No temperature found"}), 503
             
@@ -50,7 +54,6 @@ def get_temperature():
         "count": len(temps),
         "status": get_temperature_avg(avg)
         })
-
 
 
 def fetch_box_data(box_id):
