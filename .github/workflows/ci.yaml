@@ -43,3 +43,15 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
+      - name: Run Semgrep
+        run: |
+          pip install semgrep
+          semgrep --config=p/python --error app/
+
+      - name: Run Terrascan
+        uses: tenable/terrascan-action@main
+        with:
+          iac_type: docker
+          iac_dir: .
+          only_warn: true
+
