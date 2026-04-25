@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, timezone, timedelta
 from prometheus_flask_exporter import PrometheusMetrics
-from flask import Flask, jsonify
+from flask import Flask, jsonify, current_app
 import os
 
 app = Flask(__name__)
@@ -41,8 +41,9 @@ def get_temperature():
             if temperature is not None:
                 temps.append(temperature)
                 
-    except Exception as e:
-        return jsonify({"error": f"External API error: {e}"}), 503  
+    except Exception:
+        current_app.logger.exception("External API error while fetching temperature data")
+        return jsonify({"error": "External API unavailable"}), 503  
           
     if not temps:
         return jsonify({"error": "No temperature found"}), 503
