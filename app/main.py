@@ -88,7 +88,3 @@ def extract_recent_temperature(sensors, cutoff):
         return float(last_measurement.get("value"))
     
     return None
-
-
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
