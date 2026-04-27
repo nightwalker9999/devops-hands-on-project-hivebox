@@ -49,7 +49,7 @@ jobs:
           semgrep --config=p/python --error app/
 
       - name: Run Terrascan
-        uses: tenable/terrascan-action@main
+        uses: tenable/terrascan-action@v1.5.0
         with:
           iac_type: docker
           iac_dir: .
