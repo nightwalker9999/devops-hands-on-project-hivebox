@@ -49,9 +49,11 @@ jobs:
           semgrep --config=p/python --error app/
 
       - name: Run Terrascan
-        uses: tenable/terrascan-action@v1.5.0
+        id: terrascan
+        uses: tenable/terrascan-action@main  # Change v1.5.0 to main
         with:
-          iac_type: docker
-          iac_dir: .
+          iac_type: 'docker'
+          iac_dir: '.'
+          policy_type: 'docker'
           only_warn: true
 
