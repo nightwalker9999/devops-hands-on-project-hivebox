@@ -48,12 +48,11 @@ jobs:
           pip install semgrep
           semgrep --config=p/python --error app/
 
-      - name: Run Terrascan
-        id: terrascan
-        uses: tenable/terrascan-action@main  # Change v1.5.0 to main
+      - name: Run Trivy (Dockerfile scan)
+        uses: aquasecurity/trivy-action@0.30.0
         with:
-          iac_type: 'docker'
-          iac_dir: '.'
-          policy_type: 'docker'
-          only_warn: true
+          scan-type: config
+          scan-ref: .
+          exit-code: 0
+          severity: HIGH,CRITICAL
 
