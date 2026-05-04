@@ -54,7 +54,7 @@ def test_temperature_503_when_no_data(client):
 
 def test_extract_returns_none_for_old_data():
     cutoff = datetime.now(timezone.utc)
-    sensors = [
+    sensors = [ 
         {
             "title": "Temperatur",
             "lastMeasurement": {
