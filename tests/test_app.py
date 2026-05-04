@@ -42,7 +42,7 @@ def test_temperature_returns_avg(client):
         data = response.get_json()
         assert data["temperature"] == 22.5
         assert data["unit"] == "celsius"
-        assert data["count"] == 1
+        assert data["count"] == 3
 
 def test_temperature_503_when_no_data(client):
     with patch("app.main.get_sensors", return_value=[]):

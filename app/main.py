@@ -22,7 +22,7 @@ def get_temperature_avg(avg):
     elif avg <=36:
         return "Good"
     else:
-        print("Too Hot")
+        return "Too Hot"
 
 @app.route("/version")
 def print_version():
