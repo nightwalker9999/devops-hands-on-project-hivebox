@@ -10,6 +10,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs: 
   lint_and_test:
@@ -56,3 +57,45 @@ jobs:
           exit-code: 0
           severity: HIGH,CRITICAL
 
+  deploy:
+    needs: lint_and_test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create KIND cluster
+        uses: helm/kind-action@v1.10.0
+        with:
+          config: k8s/kind-config.yaml
+
+      - name: Install Ingress-Nginx
+        run: |
+          kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/main/deploy/static/provider/kind/deploy.yaml
+          kubectl wait --namespace ingress-nginx \
+            --for=condition=ready pod \
+            --selector=app.kubernetes.io/component=controller \
+            --timeout=90s
+
+      - name: Build image into KIND
+        run: |
+          docker build -t hivebox:local .
+          kind load docker-image hivebox:local
+
+      - name: Update image in deployment
+        run: |
+          sed -i 's|ghcr.io/nightwalker9999/hivebox:latest|hivebox:local|' k8s/deployment.yaml
+
+      - name: Deploy to KIND
+        run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          kubectl wait --for=condition=available deployment/hivebox --timeout=60s
+
+      - name: Verify /version endpoint
+        run: |
+          kubectl port-forward svc/hivebox 5000:80 &
+          sleep 3
+          curl -f http://localhost:5000/version
