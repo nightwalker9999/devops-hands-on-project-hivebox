@@ -98,11 +98,11 @@ jobs:
           kubectl logs -l app=hivebox --previous || true
           kubectl wait --for=condition=available deployment/hivebox --timeout=60s
 
-      - name: Deploy to KIND
-        run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          kubectl wait --for=condition=available deployment/hivebox --timeout=60s
+      # - name: Deploy to KIND
+      #   run: |
+      #     kubectl apply -f k8s/deployment.yaml
+      #     kubectl apply -f k8s/service.yaml
+      #     kubectl wait --for=condition=available deployment/hivebox --timeout=60s
 
       - name: Verify /version endpoint
         run: |
