@@ -1,7 +1,3 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hivebox
 spec:
   replicas: 1
   selector:
@@ -12,6 +8,9 @@ spec:
       labels:
         app: hivebox
     spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
         - name: hivebox
           image: ghcr.io/nightwalker9999/hivebox:latest
@@ -19,6 +18,7 @@ spec:
             runAsNonRoot: true
             runAsUser: 1000
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
           ports:
             - containerPort: 5000
           readinessProbe:
@@ -27,3 +27,6 @@ spec:
               port: 5000
             initialDelaySeconds: 5
             periodSeconds: 5
+      volumes:
+        - name: tmp
+          emptyDir: {}      
