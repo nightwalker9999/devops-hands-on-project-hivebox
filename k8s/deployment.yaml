@@ -1,3 +1,7 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hivebox
 spec:
   replicas: 1
   selector:
@@ -21,6 +25,9 @@ spec:
             readOnlyRootFilesystem: true
           ports:
             - containerPort: 5000
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
           readinessProbe:
             httpGet:
               path: /version
