@@ -67,9 +67,10 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Create KIND cluster
-        uses: helm/kind-action@v1.10.0
+        uses: helm/kind-action@v1.14.0
         with:
           config: k8s/kind-config.yaml
+          cluster_name: kind
 
       - name: Install Ingress-Nginx
         run: |

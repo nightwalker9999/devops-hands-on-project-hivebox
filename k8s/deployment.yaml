@@ -15,6 +15,10 @@ spec:
       containers:
         - name: hivebox
           image: ghcr.io/nightwalker9999/hivebox:latest
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5000
           readinessProbe:
