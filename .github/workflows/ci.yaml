@@ -91,6 +91,9 @@ jobs:
 
       - name: Deploy to KIND
         run: |
+          kubectl apply -f k8s/deployment.yaml
+          kubectl apply -f k8s/service.yaml
+          
           # Wait for pod to exist (not be ready, just exist)
           kubectl wait --for=jsonpath='{.status.phase}'=Running pod -l app=hivebox --timeout=30s || true
           
