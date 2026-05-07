@@ -91,12 +91,23 @@ jobs:
 
       - name: Deploy to KIND
         run: |
-          kubectl apply -f k8s/deployment.yaml
-          kubectl apply -f k8s/service.yaml
-          sleep 30
+          # Wait for pod to exist (not be ready, just exist)
+          kubectl wait --for=jsonpath='{.status.phase}'=Running pod -l app=hivebox --timeout=30s || true
+          
+          echo "===== POD STATUS ====="
+          kubectl get pods -l app=hivebox -o wide
+          
+          echo "===== DESCRIBE ====="
           kubectl describe pod -l app=hivebox
-          kubectl logs -l app=hivebox --previous || true
-          kubectl wait --for=condition=available deployment/hivebox --timeout=60s
+          
+          echo "===== CURRENT LOGS (this attempt) ====="
+          kubectl logs -l app=hivebox --tail=200 || echo "no current logs yet"
+          
+          echo "===== PREVIOUS LOGS (crashed attempt) ====="
+          kubectl logs -l app=hivebox --previous --tail=200 || echo "no previous logs (first crash, normal)"
+          
+          echo "===== EVENTS ====="
+          kubectl get events --sort-by='.lastTimestamp' | tail -30
 
       # - name: Deploy to KIND
       #   run: |

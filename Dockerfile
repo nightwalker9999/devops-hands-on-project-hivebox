@@ -15,4 +15,4 @@ ENV PYTHONDONTWRITEBYTECODE=1
 HEALTHCHECK --interval=30s --timeout=3s \
   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:5000/version')"
 
-CMD ["python", "main.py"]
+CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "main:app"]
