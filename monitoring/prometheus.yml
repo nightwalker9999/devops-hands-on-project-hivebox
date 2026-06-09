@@ -1,0 +1,7 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: hivebox
+    static_configs:
+      - targets: ["hivebox:5000"]
