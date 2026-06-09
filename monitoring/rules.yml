@@ -1,0 +1,11 @@
+groups:
+  - name: hivebox_slo
+    interval: 30s
+    rules:
+      - record: job:hivebox_request_rate:rate5m
+        expr: sum(rate(flask_http_request_total[5m]))
+      - record: job:hivebox_request_error_ratio:rate5m
+        expr: |
+          sum(rate(flask_http_request_total{status=~"5.."}[5m]))
+          /
+          sum(rate(flask_http_request_total[5m]))
